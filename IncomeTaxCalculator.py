@@ -53,20 +53,20 @@ income_entry.focus_set()
 label_income_tax = tkinter.Label(root, text='Tax : '+'10000'+' /-', font="TkDefaultFont 14")
 label_income_tax.place(rely=0.3, relx=0.65)
 
-label_income_tax = tkinter.Label(root, text='Cess : '+'10000'+' /-', font="TkDefaultFont 14")
-label_income_tax.place(rely=0.5, relx=0.65)
+label_cess = tkinter.Label(root, text='Cess : '+'10000'+' /-', font="TkDefaultFont 14")
+label_cess.place(rely=0.5, relx=0.65)
 
-button_edit = ttk.Button(root, text='Add')
-button_edit.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.1)
+button_add = ttk.Button(root, text='Add')
+button_add.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.1)
 
 button_delete = ttk.Button(root, text='Delete', state=tkinter.DISABLED)
 button_delete.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.22)
 
-button_delete = ttk.Button(root, text='Edit Rate', state=tkinter.DISABLED)
-button_delete.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.34)
+button_edit = ttk.Button(root, text='Edit Rate', state=tkinter.DISABLED)
+button_edit.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.34)
 
-label_cess = tkinter.Label(root, text='CESS Rate : '+'10'+'%', font="TkDefaultFont 20")
-label_cess.place(relx=0.02, rely=0.8)
+label_cess_rate = tkinter.Label(root, text='CESS Rate : '+'10'+'%', font="TkDefaultFont 20")
+label_cess_rate.place(relx=0.02, rely=0.8)
 
 button_cess_edit = ttk.Button(root, text='Edit')
 button_cess_edit.place(relwidth=0.07, relheight=0.0256*2, rely=0.8, relx=0.3)
