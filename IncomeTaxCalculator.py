@@ -5,6 +5,17 @@ import sqlite3
 import re
 
 # needed functions
+# validating entry for only numeric values
+def only_numeric(letter):
+    l = letter.replace(',', '')
+    if bool(re.match('\d*\.\d*$', l)):
+        return True
+    if l.isdigit():
+        return True
+    if l == '':
+        return True
+    else:
+        return False
 
 # database creation and table initialization
 def initialize_database_tables():
@@ -49,6 +60,7 @@ label_income.place(rely=0.05, relx=0.6)
 income_entry = tkinter.Entry(root, justify='right', font="TkDefaultFont 14")
 income_entry.place(rely=0.05, relx=0.7, relwidth=0.2)
 income_entry.focus_set()
+income_entry.config(validate='all', validatecommand=(root.register(only_numeric), '%P'))
 
 label_income_tax = tkinter.Label(root, text='Tax : '+'10000'+' /-', font="TkDefaultFont 14")
 label_income_tax.place(rely=0.3, relx=0.65)
