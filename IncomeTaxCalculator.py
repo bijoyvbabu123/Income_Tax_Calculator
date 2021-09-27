@@ -28,6 +28,32 @@ def initialize_database_tables():
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS cesstax (rate REAL)""")
     db_connection.commit()
 
+# updating tree
+def update_tree():
+    tree.delete(*tree.get_children())
+
+    db_connection = sqlite3.connect('data.db')
+    db_cursor = db_connection.cursor()
+
+    db_cursor.execute("SELECT * FROM incometax")
+    data = db_cursor.fetchall()
+    
+    for i in range(len(data)):
+        row = []
+        f = data[i][0]
+        t = data[i][1]
+        r = data[i][2]
+        
+        for j in [f, t, r]:
+            row.append(j)
+
+        if i%2 == 0:
+            tree.insert(parent='', index='end', iid=i+1, values=row)
+        else:
+            tree.insert(parent='', index='end', iid=i+1, values=row, tags=('odd',))
+    
+    db_connection.close()
+
 # initial function calling
 initialize_database_tables()
 
@@ -96,12 +122,12 @@ root.update()
 tree.update()
 tree.column('from', anchor=tkinter.E, width=int(tree.winfo_width() / 3))
 tree.column('to', anchor=tkinter.E, width=int(tree.winfo_width() / 3))
-tree.column('rate', anchor=tkinter.E, width=int(tree.winfo_width() / 3))
+tree.column('rate', anchor=tkinter.E, width=int(tree.winfo_width() / 3.1))
 tree.heading('from', text='From')  # , anchor=tkinter.W
 tree.heading('to', text='To')
 tree.heading('rate', text='Rate %')
 
 tree.tag_configure('odd', background="light sky blue")
-
+update_tree()
 
 root.mainloop()
