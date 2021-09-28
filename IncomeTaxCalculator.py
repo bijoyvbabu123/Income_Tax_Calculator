@@ -84,6 +84,7 @@ def update_tree():
     label_cess_rate.config(text='CESS Rate : '+str(ce[0][0])+'%')
 
     db_connection.close()
+    check_tree_selection(event = None)
 
 # function for adding price and rate into the tree
 def add_range():
