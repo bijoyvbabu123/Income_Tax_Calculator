@@ -108,39 +108,31 @@ def add_range():
     window.minsize(width=window_width, height=window_height)
     window.geometry(f'{window_width}x{window_height}+{window_x}+{window_y}')
 
+    db_connection = sqlite3.connect('data.db')
+    db_cursor = db_connection.cursor()
+
+    db_cursor.execute("SELECT * FROM incometax")
+    data = db_cursor.fetchall()    
+
+    low = 0.00
+    if data:
+        low = data[-1][1]
 
     def addentry():
         valid = True
-
-        error = False  # to check if the "To" is lesser than "From"
-
-        db_connection = sqlite3.connect('data.db')
-        db_cursor = db_connection.cursor()
-
-        db_cursor.execute("SELECT * FROM incometax")
-        data = db_cursor.fetchall()
-
-        if f.get() == '':
-            f.insert(0, '0.00')
+        
         if r.get() == '':
             r.insert(0, '0.00')
         
-        low = float(f.get().replace(',',''))
-        high = 1125899906842624.00  # this is the max value ;)
+        high = 999999999999999.00  # this is the max value ;)
         if t.get() != '':
             high = float(t.get().replace(',',''))
-        rate = float(r.get().replace(',',''))
+
+        rate = float(r.get())
         
         if high < low:
             valid = False
-            error = True
 
-        for i in data:
-            if i[0] <= low <= i[1]:
-                valid = False
-            if i[0] <= high <= i[1]:
-                valid = False
-        
         if(valid):
             db_cursor.execute("""INSERT INTO incometax VALUES (?,?,?)""",(low, high, rate))
             db_connection.commit()
@@ -150,26 +142,26 @@ def add_range():
             window.destroy()
         
         else:
-            if error:
-                messagebox.showwarning('Invalid Range', 'Please enter a valid range')
-                window.focus_force()
-            else:
-                messagebox.showwarning('Range Overlap', 'The range you have entered is overlaping with an existing range')
-                window.focus_force()
+            messagebox.showwarning('Invalid Range', 'Please enter a valid range')
+            window.focus_force()
+            t.focus_set()
 
     fl = tkinter.Label(window, text='From : ', font='TkDefaultFont 12')
     fl.place(relx=0.05, rely=0.03)
 
     f = tkinter.Entry(window, font='TkDefaultFont 12', justify='right')
     f.place(relx=0.25, rely=0.03)
-    f.focus_set()
     f.config(validate='all', validatecommand=(window.register(only_numeric), '%P'))
+
+    f.insert(0, low)
+    f.config(state=tkinter.DISABLED)
 
     tl = tkinter.Label(window, text='To : ', font='TkDefaultFont 12')
     tl.place(relx=0.05, rely=0.23)
 
     t = tkinter.Entry(window, font='TkDefaultFont 12', justify='right')
     t.place(relx=0.25, rely=0.23)
+    t.focus_set()
     t.config(validate='all', validatecommand=(window.register(only_numeric), '%P'))
 
     rl = tkinter.Label(window, text='Rate % : ', font='TkDefaultFont 12')
