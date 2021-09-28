@@ -39,6 +39,11 @@ def initialize_database_tables():
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS cesstax (rate REAL)""")
     db_connection.commit()
 
+    db_cursor.execute("""INSERT INTO cesstax VALUES (0)""")
+    db_connection.commit()
+
+    db_connection.close()
+
 # sorting the table permanently
 def sort_db_table():
     db_connection = sqlite3.connect('data.db')
