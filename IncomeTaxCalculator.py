@@ -47,22 +47,6 @@ def initialize_database_tables():
 
     db_connection.close()
 
-# sorting the table permanently
-def sort_db_table():
-    db_connection = sqlite3.connect('data.db')
-    db_cursor = db_connection.cursor()
-
-    db_cursor.execute("""CREATE TABLE s_incometax (f REAL, t REAL, rate REAL)""")
-    db_connection.commit()
-    db_cursor.execute("""INSERT INTO s_incometax (f, t, rate) SELECT f, t, rate FROM incometax ORDER BY f""")
-    db_connection.commit()
-    db_cursor.execute("""DROP TABLE incometax""")
-    db_connection.commit()
-    db_cursor.execute("""ALTER TABLE s_incometax RENAME TO incometax""")
-    db_connection.commit()
-
-    db_connection.close()
-
 # updating tree and cess rate label
 def update_tree():
     tree.delete(*tree.get_children())
@@ -137,7 +121,6 @@ def add_range():
             db_cursor.execute("""INSERT INTO incometax VALUES (?,?,?)""",(low, high, rate))
             db_connection.commit()
             db_connection.close()
-            sort_db_table()
             update_tree()
             window.destroy()
         
@@ -201,9 +184,21 @@ def tax_and_cess(event):
 
 # checking tree selection
 def check_tree_selection(event):
+
     if tree.selection():
+        db_connection = sqlite3.connect('data.db')
+        db_cursor = db_connection.cursor()
+
+        db_cursor.execute("SELECT COUNT(*) FROM incometax")
+        rows = db_cursor.fetchall()[0][0]
+        db_connection.close()
+
+        row = int(tree.selection()[0])
+
         button_edit.config(state=tkinter.NORMAL)
-        button_delete.config(state=tkinter.NORMAL)
+        
+        if row == rows:
+            button_delete.config(state=tkinter.NORMAL)
     else:
         button_edit.config(state=tkinter.DISABLED)
         button_delete.config(state=tkinter.DISABLED)
@@ -256,7 +251,6 @@ def delete_range():
     db_cursor.execute("DELETE FROM incometax WHERE rowid="+str(row))
     db_connection.commit()
 
-    sort_db_table()
     update_tree()
 
 # edit rate of selected range
