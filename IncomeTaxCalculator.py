@@ -161,6 +161,7 @@ def add_range():
 def tax_and_cess(event):
     label_income_tax.config(text='Tax : '+'-'+' /-')
     label_cess.config(text='Cess : '+'-'+' /-')
+    label_total.config(text='Total : '+'-'+' /-')
 
     if income_entry.get() != '':
         income = float(income_entry.get().replace(',',''))
@@ -174,13 +175,36 @@ def tax_and_cess(event):
         db_cursor.execute("""SELECT * FROM cesstax""")
         ce = db_cursor.fetchall()
 
-        for i in data:
+        tax = 0.00
+         
+        for i in range(len(data)):
+            r = data[i][1]-data[i][0]
+
+            if income <= r:
+                tax += (income * data[i][2] / 100)
+                break
+
+            else:
+                income -= r
+                tax += (r * data[i][2] / 100)
+
+        cess = (ce[0][0]/100)*tax
+        total = tax + cess
+
+        label_income_tax.config(text='Tax : '+str(tax)+' /-')
+        label_cess.config(text='Cess : '+str(cess)+' /-')
+        label_total.config(text='Total : '+str(total)+' /-')
+
+        """
+         for i in data:
             if i[0] <= income <= i[1]:
                 tax = (i[2]/100)*income
                 label_income_tax.config(text='Tax : '+str(tax)+' /-')
                 cess = (ce[0][0]/100)*tax
                 label_cess.config(text='Cess : '+str(cess)+' /-')
                 break
+        """
+            
 
 # checking tree selection
 def check_tree_selection(event):
@@ -228,6 +252,7 @@ def cess_rate_edit():
         db_cursor.execute("UPDATE cesstax SET rate="+str(rate))
         db_connection.commit()
         update_tree()
+        tax_and_cess(event=None)
         window.destroy()
 
     l = tkinter.Label(window, text='Rate : ', font='TkDefaultFont 12')
@@ -332,7 +357,10 @@ label_income_tax = tkinter.Label(root, text='Tax : '+'-'+' /-', font="TkDefaultF
 label_income_tax.place(rely=0.3, relx=0.65)
 
 label_cess = tkinter.Label(root, text='Cess : '+'-'+' /-', font="TkDefaultFont 14")
-label_cess.place(rely=0.5, relx=0.65)
+label_cess.place(rely=0.4, relx=0.65)
+
+label_total = tkinter.Label(root, text='Total : '+'-'+' /-', font="TkDefaultFont 14")
+label_total.place(rely=0.5, relx=0.65)
 
 button_add = ttk.Button(root, text='Add', command=add_range)
 button_add.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.1)
