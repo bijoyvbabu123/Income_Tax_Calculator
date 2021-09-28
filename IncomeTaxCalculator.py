@@ -17,6 +17,17 @@ def only_numeric(letter):
     else:
         return False
 
+# validating percentage only entry
+def only_per(letter):
+    if bool(re.match('\d*\.\d*$', letter)):
+        return True
+    if letter.isdigit():
+        return True
+    if letter == '':
+        return True
+    else:
+        return False
+
 # database creation and table initialization
 def initialize_database_tables():
     db_connection = sqlite3.connect('data.db')
@@ -28,6 +39,22 @@ def initialize_database_tables():
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS cesstax (rate REAL)""")
     db_connection.commit()
 
+# sorting the table permanently
+def sort_db_table():
+    db_connection = sqlite3.connect('data.db')
+    db_cursor = db_connection.cursor()
+
+    db_cursor.execute("""CREATE TABLE s_incometax (f REAL, t REAL, rate REAL)""")
+    db_connection.commit()
+    db_cursor.execute("""INSERT INTO s_incometax (f, t, rate) SELECT f, t, rate FROM incometax ORDER BY f""")
+    db_connection.commit()
+    db_cursor.execute("""DROP TABLE incometax""")
+    db_connection.commit()
+    db_cursor.execute("""ALTER TABLE s_incometax RENAME TO incometax""")
+    db_connection.commit()
+
+    db_connection.close()
+
 # updating tree
 def update_tree():
     tree.delete(*tree.get_children())
@@ -37,6 +64,7 @@ def update_tree():
 
     db_cursor.execute("SELECT * FROM incometax")
     data = db_cursor.fetchall()
+    print(data)
     
     for i in range(len(data)):
         row = []
@@ -53,6 +81,95 @@ def update_tree():
             tree.insert(parent='', index='end', iid=i+1, values=row, tags=('odd',))
     
     db_connection.close()
+
+# function for adding price and rate into the tree
+def add_range():
+    window = tkinter.Toplevel()
+    window.focus_set()
+    window.resizable(width=False, height=False)
+    window_width = 400
+    window_height = 250
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    window_x = int((screen_width / 2) - (window_width / 2))
+    window_y = int((screen_height / 2) - (window_height / 2)) - 50
+    window.minsize(width=window_width, height=window_height)
+    window.geometry(f'{window_width}x{window_height}+{window_x}+{window_y}')
+
+
+    def addentry():
+        valid = True
+
+        error = False  # to check if the "To" is lesser than "From"
+
+        db_connection = sqlite3.connect('data.db')
+        db_cursor = db_connection.cursor()
+
+        db_cursor.execute("SELECT * FROM incometax")
+        data = db_cursor.fetchall()
+
+        if f.get() == '':
+            f.insert(0, '0.00')
+        if r.get() == '':
+            r.insert(0, '0.00')
+        
+        low = float(f.get().replace(',',''))
+        high = 1125899906842624.00  # this is the max value ;)
+        if t.get() != '':
+            high = float(t.get().replace(',',''))
+        rate = float(r.get().replace(',',''))
+        
+        if high < low:
+            valid = False
+            error = True
+
+        for i in data:
+            if i[0] <= low <= i[1]:
+                valid = False
+            if i[0] <= high <= i[1]:
+                valid = False
+        
+        if(valid):
+            db_cursor.execute("""INSERT INTO incometax VALUES (?,?,?)""",(low, high, rate))
+            db_connection.commit()
+            db_connection.close()
+            sort_db_table()
+            update_tree()
+            window.destroy()
+        
+        else:
+            if error:
+                messagebox.showwarning('Invalid Range', 'Please enter a valid range')
+                window.focus_force()
+            else:
+                messagebox.showwarning('Range Overlap', 'The range you have entered is overlaping with an existing range')
+                window.focus_force()
+
+    fl = tkinter.Label(window, text='From : ', font='TkDefaultFont 12')
+    fl.place(relx=0.05, rely=0.03)
+
+    f = tkinter.Entry(window, font='TkDefaultFont 12', justify='right')
+    f.place(relx=0.25, rely=0.03)
+    f.focus_set()
+    f.config(validate='all', validatecommand=(window.register(only_numeric), '%P'))
+
+    tl = tkinter.Label(window, text='To : ', font='TkDefaultFont 12')
+    tl.place(relx=0.05, rely=0.23)
+
+    t = tkinter.Entry(window, font='TkDefaultFont 12', justify='right')
+    t.place(relx=0.25, rely=0.23)
+    t.config(validate='all', validatecommand=(window.register(only_numeric), '%P'))
+
+    rl = tkinter.Label(window, text='Rate % : ', font='TkDefaultFont 12')
+    rl.place(relx=0.05, rely=0.43)
+
+    r = tkinter.Entry(window, font='TkDefaultFont 12', justify='center')
+    r.place(relx=0.25, rely=0.43)
+    r.config(validate='all', validatecommand=(window.register(only_per), '%P'))
+
+    b = tkinter.Button(window, text='ADD', command=addentry, font='TkDefaultFont 12')
+    b.place(relx=0.45, rely=0.7)
+
 
 # initial function calling
 initialize_database_tables()
@@ -94,7 +211,7 @@ label_income_tax.place(rely=0.3, relx=0.65)
 label_cess = tkinter.Label(root, text='Cess : '+'10000'+' /-', font="TkDefaultFont 14")
 label_cess.place(rely=0.5, relx=0.65)
 
-button_add = ttk.Button(root, text='Add')
+button_add = ttk.Button(root, text='Add', command=add_range)
 button_add.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.1)
 
 button_delete = ttk.Button(root, text='Delete', state=tkinter.DISABLED)
