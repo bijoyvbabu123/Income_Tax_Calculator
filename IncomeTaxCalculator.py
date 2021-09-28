@@ -170,6 +170,27 @@ def add_range():
     b = tkinter.Button(window, text='ADD', command=addentry, font='TkDefaultFont 12')
     b.place(relx=0.45, rely=0.7)
 
+# finding tax and cess
+def tax_and_cess(event):
+    label_income_tax.config(text='Tax : '+'-'+' /-')
+    label_cess.config(text='Cess : '+'-'+' /-')
+
+    if income_entry.get() != '':
+        income = float(income_entry.get().replace(',',''))
+
+        db_connection = sqlite3.connect('data.db')
+        db_cursor = db_connection.cursor()
+
+        db_cursor.execute("SELECT * FROM incometax")
+        data = db_cursor.fetchall()
+
+        for i in data:
+            if i[0] <= income <= i[1]:
+                tax = (i[2]/100)*income
+                label_income_tax.config(text='Tax : '+str(tax)+' /-')
+                #add cess finding
+                break
+
 
 # initial function calling
 initialize_database_tables()
@@ -204,11 +225,12 @@ income_entry = tkinter.Entry(root, justify='right', font="TkDefaultFont 14")
 income_entry.place(rely=0.05, relx=0.7, relwidth=0.2)
 income_entry.focus_set()
 income_entry.config(validate='all', validatecommand=(root.register(only_numeric), '%P'))
+income_entry.bind("<KeyRelease>", lambda event: tax_and_cess(event))
 
-label_income_tax = tkinter.Label(root, text='Tax : '+'10000'+' /-', font="TkDefaultFont 14")
+label_income_tax = tkinter.Label(root, text='Tax : '+'-'+' /-', font="TkDefaultFont 14")
 label_income_tax.place(rely=0.3, relx=0.65)
 
-label_cess = tkinter.Label(root, text='Cess : '+'10000'+' /-', font="TkDefaultFont 14")
+label_cess = tkinter.Label(root, text='Cess : '+'-'+' /-', font="TkDefaultFont 14")
 label_cess.place(rely=0.5, relx=0.65)
 
 button_add = ttk.Button(root, text='Add', command=add_range)
