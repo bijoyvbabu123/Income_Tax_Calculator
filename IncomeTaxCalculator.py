@@ -259,7 +259,45 @@ def delete_range():
     sort_db_table()
     update_tree()
 
-    
+# edit rate of selected range
+def edit_rate():
+    window = tkinter.Toplevel()
+    window.focus_set()
+    window.resizable(width=False, height=False)
+    window_width = 400
+    window_height = 250
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    window_x = int((screen_width / 2) - (window_width / 2))
+    window_y = int((screen_height / 2) - (window_height / 2)) - 50
+    window.minsize(width=window_width, height=window_height)
+    window.geometry(f'{window_width}x{window_height}+{window_x}+{window_y}')
+
+    row = int(tree.selection()[0])
+    def update_rate():
+        if r.get() == '':
+            r.insert(0, '0.00')
+        rate = float(r.get())
+
+        db_connection = sqlite3.connect('data.db')
+        db_cursor = db_connection.cursor()
+
+        db_cursor.execute("UPDATE incometax SET rate="+str(rate)+" where rowid="+str(row))
+        db_connection.commit()
+
+        update_tree()
+        window.destroy()
+
+    l = tkinter.Label(window, text='Rate : ', font='TkDefaultFont 12')
+    l.place(relx=0.15, rely=0.3)
+
+    r = tkinter.Entry(window, font='TkDefaultFont 12', justify='center')
+    r.place(relx=0.3, rely=0.3)
+    r.focus_set()
+    r.config(validate='all', validatecommand=(window.register(only_per), '%P'))
+
+    b = tkinter.Button(window, text='SET', font='TkDefaultFont 12', command=update_rate)
+    b.place(relx=0.45, rely=0.6)
 
 # initial function calling
 initialize_database_tables()
@@ -308,7 +346,7 @@ button_add.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.1)
 button_delete = ttk.Button(root, text='Delete', state=tkinter.DISABLED, command=delete_range)
 button_delete.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.22)
 
-button_edit = ttk.Button(root, text='Edit Rate', state=tkinter.DISABLED)
+button_edit = ttk.Button(root, text='Edit Rate', state=tkinter.DISABLED, command=edit_rate)
 button_edit.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.34)
 
 label_cess_rate = tkinter.Label(root, text='CESS Rate : '+'10'+'%', font="TkDefaultFont 20")
