@@ -55,7 +55,7 @@ def sort_db_table():
 
     db_connection.close()
 
-# updating tree
+# updating tree and cess rate label
 def update_tree():
     tree.delete(*tree.get_children())
 
@@ -64,7 +64,6 @@ def update_tree():
 
     db_cursor.execute("SELECT * FROM incometax")
     data = db_cursor.fetchall()
-    print(data)
     
     for i in range(len(data)):
         row = []
@@ -80,6 +79,10 @@ def update_tree():
         else:
             tree.insert(parent='', index='end', iid=i+1, values=row, tags=('odd',))
     
+    db_cursor.execute("""SELECT * FROM cesstax""")
+    ce = db_cursor.fetchall()
+    label_cess_rate.config(text='CESS Rate : '+str(ce[0][0])+'%')
+
     db_connection.close()
 
 # function for adding price and rate into the tree
@@ -184,11 +187,15 @@ def tax_and_cess(event):
         db_cursor.execute("SELECT * FROM incometax")
         data = db_cursor.fetchall()
 
+        db_cursor.execute("""SELECT * FROM cesstax""")
+        ce = db_cursor.fetchall()
+
         for i in data:
             if i[0] <= income <= i[1]:
                 tax = (i[2]/100)*income
                 label_income_tax.config(text='Tax : '+str(tax)+' /-')
-                #add cess finding
+                cess = (ce[0][0]/100)*tax
+                label_cess.config(text='Cess : '+str(cess)+' /-')
                 break
 
 
