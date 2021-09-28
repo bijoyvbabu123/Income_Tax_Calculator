@@ -198,6 +198,14 @@ def tax_and_cess(event):
                 label_cess.config(text='Cess : '+str(cess)+' /-')
                 break
 
+# checking tree selection
+def check_tree_selection(event):
+    if tree.selection():
+        button_edit.config(state=tkinter.NORMAL)
+        button_delete.config(state=tkinter.NORMAL)
+    else:
+        button_edit.config(state=tkinter.DISABLED)
+        button_delete.config(state=tkinter.DISABLED)
 
 # initial function calling
 initialize_database_tables()
@@ -260,6 +268,10 @@ treescroll.place(relheight=0.6, relx=0.52, rely=0.03)
 
 tree = ttk.Treeview(root, show=['headings'], selectmode='browse', yscrollcommand=treescroll.set)
 tree.place(relwidth=0.5, relheight=0.6, relx=0.02, rely=0.03)
+
+tree.bind('<FocusIn>', check_tree_selection)
+tree.bind('<ButtonRelease-1>', check_tree_selection)
+tree.bind('<KeyRelease>', check_tree_selection)
 
 treescroll.config(command=tree.yview)
 
