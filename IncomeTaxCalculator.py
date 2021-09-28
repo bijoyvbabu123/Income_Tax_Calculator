@@ -246,6 +246,19 @@ def cess_rate_edit():
     b = tkinter.Button(window, text='SET', font='TkDefaultFont 12', command=update_cess)
     b.place(relx=0.45, rely=0.6)
 
+# deleting from tree
+def delete_range():
+    row = int(tree.selection()[0])
+
+    db_connection = sqlite3.connect('data.db')
+    db_cursor = db_connection.cursor()
+
+    db_cursor.execute("DELETE FROM incometax WHERE rowid="+str(row))
+    db_connection.commit()
+
+    sort_db_table()
+    update_tree()
+
     
 
 # initial function calling
@@ -292,7 +305,7 @@ label_cess.place(rely=0.5, relx=0.65)
 button_add = ttk.Button(root, text='Add', command=add_range)
 button_add.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.1)
 
-button_delete = ttk.Button(root, text='Delete', state=tkinter.DISABLED)
+button_delete = ttk.Button(root, text='Delete', state=tkinter.DISABLED, command=delete_range)
 button_delete.place(relwidth=0.07, relheight=0.0256 * 2, rely=0.66, relx=0.22)
 
 button_edit = ttk.Button(root, text='Edit Rate', state=tkinter.DISABLED)
