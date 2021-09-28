@@ -39,8 +39,11 @@ def initialize_database_tables():
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS cesstax (rate REAL)""")
     db_connection.commit()
 
-    db_cursor.execute("""INSERT INTO cesstax VALUES (0)""")
-    db_connection.commit()
+    db_cursor.execute("""SELECT * FROM cesstax""")
+    data = db_cursor.fetchall()
+    if not data:
+        db_cursor.execute("""INSERT INTO cesstax VALUES (0)""")
+        db_connection.commit()
 
     db_connection.close()
 
